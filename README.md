@@ -1,4 +1,4 @@
 Babybou_IBM
 ===========
 
-Identifying parturition and neonate survival using movement data. This is the R code for the individual based method to identifying parturition and neonate survival from the movement data of female woodland caribou. The code and the paper and supplementary material are provided.
+Identifying parturition and neonate survival using movement data. This is the R code for the individual based method to identifying parturition and neonate survival from the movement data of female woodland caribou. The code and the paper and supplementary material are provided. You can also find more code and information at: https://sites.google.com/site/babybou2013/
