@@ -15,7 +15,7 @@
 #
 #   2. Gharajehdaghipour, T., M. Auger-Méthé, A. C. Burton. (2025). 
 #   Neonate mortality in mountain caribou: Patterns of predation during onset of a wolf reduction program.
-#   Journal of Wildlife Management.
+#   Journal of Wildlife Management. DOI: 10.1002/jwmg.70143
 # 
 # For an in-depth explanation of the code see the supporting information associated with DeMars et al. (2013):
 #   Appendix S2. Likelihood Functions Used in the Individual-based Method. 
