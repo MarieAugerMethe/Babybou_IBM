@@ -1,30 +1,23 @@
-## Date created: 22 November 2024 
-# Authors: Marie Auger-Méthé, Tazarve Gharajehdaghipour
+# Authors: Marie Auger-Methe, Ulrike Schlägel, Craig DeMars, Tazarve Gharajehdaghipour
 
 # The following code is a slightly modified version of the original IBM code published by DeMars et al. (2013). 
 # These modifications enhance IBM's capacity to detect breakpoints in the presence of missing data. 
 # In this version, break points can occur at any time (i.e., including during gaps in the telemetry data), 
 # while the previous version only considers times where step length data are available. 
-# We have left the original comments by DeMars et al. (2013) on the script.
+# We have left the original comments by DeMars et al. (2013) in the script.
 # Modified lines of code/comments are commented with ##MA-TG. 
 #
 # Please cite the following papers if you use this script:
 #
-#   1. Gharajehdaghipour, T., M. Auger-Méthé, A. C. Burton. (2025). 
-#   Neonate mortality in mountain caribou: Patterns of predation during onset of a wolf reduction program.
-#   Journal of Wildlife Management. 
+#   1. DeMars, C., M. Auger-Méthé, U. Schlägel, S. Boutin. (2013).
+#   Inferring Parturition and Neonate Survival from Movement Patterns of Female Ungulates.
+#   Ecology and Evolution. DOI: 10.1002/ece3.785
 #
-#   2. DeMars, C., M. Auger-Méthé, U. Schlägel, S. Boutin. (2013).
-#   Inferring Parturition and Neonate Survival from Movement Patterns of Female Ungulates.
-#   Ecology and Evolution. DOI: 10.1002/ece3.785
+#   2. Gharajehdaghipour, T., M. Auger-Méthé, A. C. Burton. (2025). 
+#   Neonate mortality in mountain caribou: Patterns of predation during onset of a wolf reduction program.
+#   Journal of Wildlife Management.
 # 
-# Original IBM code creation date: September 25th, 2013
-# Authors: Marie Auger-Methe, Ulrike Schlaegel, Craig DeMars
-# Please cite our paper if you use our script:
-#   DeMars, C., M. Auger-Méthé, U. Schlägel, S. Boutin, (Published online) 
-#   Inferring Parturition and Neonate Survival from Movement Patterns of Female Ungulates.
-#   Ecology and Evolution. DOI: 10.1002/ece3.785
-# For an in-depth explanation of the code see:
+# For an in-depth explanation of the code see the supporting information associated with DeMars et al. (2013):
 #   Appendix S2. Likelihood Functions Used in the Individual-based Method. 
 #   Appendix S3. R Code for the Individual-based Method.
 # from the supporting information:
@@ -150,13 +143,15 @@ mnll3M <- function(SL, ti, tp, int, kcons){
   #     ti and SL should be of exactly the same length.
   #     NAs are allowed. ##MA-TG
   # tp: POSIXct vector that identifies the real date and time of the SL.
-  #     The missing steps should be represented with NAs.
+  #     NAs are allowed. ##MA-TG
+  #     With the version of Gharajehdaghipour et al. (2025), ##MA-TG
+  #     the missing steps should be represented with NAs.  ##MA-TG
   #     For example if you have locations
   #     (0,0) (0,1) (0,3) (1,3) (7,3)
   #     taken at:
   #     01:00, 02:00, 03:00, 08:00, 09:00
-  #     SL = (1,2,6)
-  #     ti = (1,2,8)
+  #     SL = (1, 2, NA, NA, NA, NA, NA, 6, NA) ##MA-TG
+  #     ti = (1, 2, NA, NA, NA, NA, NA, 8, NA) ##MA-TG
   #     tp = (01:00, 02:00, NA, NA, NA, NA, NA, 08:00, NA)
   #     (Although excluded for clarity, tp should include the date)
   #     We recommend that the time series only included the time period
