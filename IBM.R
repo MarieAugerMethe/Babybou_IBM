@@ -1,8 +1,27 @@
-##
-# Date created: September 25th, 2013
+## Date created: 22 November 2024 
+# Authors: Marie Auger-Méthé, Tazarve Gharajehdaghipour
+
+# The following code is a slightly modified version of the original IBM code published by DeMars et al. (2013). 
+# These modifications enhance IBM's capacity to detect breakpoints in the presence of missing data. 
+# In this version, break points can occur at any time (i.e., including during gaps in the telemetry data), 
+# while the previous version only considers times where step length data are available. 
+# We have left the original comments by DeMars et al. (2013) on the script.
+# Modified lines of code/comments are commented with ##MA-TG. 
+#
+# Please cite the following papers if you use this script:
+#
+#   1. Gharajehdaghipour, T., M. Auger-Méthé, A. C. Burton. (2025). 
+#   Neonate mortality in mountain caribou: Patterns of predation during onset of a wolf reduction program.
+#   Journal of Wildlife Management. 
+#
+#   2. DeMars, C., M. Auger-Méthé, U. Schlägel, S. Boutin. (2013).
+#   Inferring Parturition and Neonate Survival from Movement Patterns of Female Ungulates.
+#   Ecology and Evolution. DOI: 10.1002/ece3.785
+# 
+# Original IBM code creation date: September 25th, 2013
 # Authors: Marie Auger-Methe, Ulrike Schlaegel, Craig DeMars
 # Please cite our paper if you use our script:
-#   DeMars, C., M. Auger-M�th�, U. Schl�gel, S. Boutin, (Published online) 
+#   DeMars, C., M. Auger-Méthé, U. Schlägel, S. Boutin, (Published online) 
 #   Inferring Parturition and Neonate Survival from Movement Patterns of Female Ungulates.
 #   Ecology and Evolution. DOI: 10.1002/ece3.785
 # For an in-depth explanation of the code see:
@@ -33,7 +52,7 @@
 nllk <- function(k, SLb, tib, ba, tiBP1){
   bb <- (tib - tiBP1) * ba/k
   bb[ bb > ba ] <- ba
-  nllb <- -sum(dexp(SLb, 1/bb, log=TRUE))
+  nllb <- -sum(dexp(SLb, 1/bb, log=TRUE), na.rm = TRUE) ##MA-TG
   return(nllb)
 }
 
@@ -62,9 +81,9 @@ nll1 <- function(BP, SL, ti, kc){
   tib <- ti[(BP+1):n]
   
   # maximum likelihood estimate (MLE) of prior birth mean step length
-  ba <- mean(SLa)
+  ba <- mean(SLa, na.rm = TRUE) ##MA-TG
   # Probability of the SL before the birth of the calf when ba is used
-  mnlla <- -sum(dexp(SLa, 1/ba, log=TRUE))
+  mnlla <- sum(dexp(SLa, 1/ba, log=TRUE), na.rm = TRUE) ##MA-TG
   
   # Numericaly estimating the MLE of k and the probability of SL using this k
   mnllb <- optimize(nllk, kc, SLb=SLb, tib=tib, ba=ba, tiBP1=ti[BP])$objective
@@ -104,12 +123,12 @@ nll2 <- function(BP, SL, ti, kc){
   SLc <- SL[(BP[2]+1):length(SL)]
   
   # maximum likelihood estimate (MLE) of prior birth mean step length
-  ba <- mean(SLa)
+  ba <- mean(SLa, na.rm = TRUE) ##MA-TG
   
   # Probability of the SL before the birth and after the death of the calf
   # when l_a is used
-  mnlla <- -sum(dexp(SLa, 1/ba, log=TRUE))
-  mnllc <- -sum(dexp(SLc, 1/ba, log=TRUE))
+  mnlla <- -sum(dexp(SLa, 1/ba, log=TRUE), na.rm = TRUE) ##MA-TG
+  mnllc <- -sum(dexp(SLc, 1/ba, log=TRUE), na.rm = TRUE) ##MA-TG
   
   # Numericaly estimating the MLE of k and the probability of SL using this k
   mnllb <- optimize(nllk, kc, SLb=SLb, tib=tib, ba=ba, tiBP1=ti[BP[1]])$objective
@@ -124,12 +143,12 @@ nll2 <- function(BP, SL, ti, kc){
 mnll3M <- function(SL, ti, tp, int, kcons){
   # SL: numeric vector that contains the step lengths
   #     measured at regular time intervals.
-  #     NAs are not allowed.
+  #     NAs are allowed. ##MA-TG
   # ti: integer vector that identifies
   #     the time of each step length of SL.
   #     It is the index of the times found in tp.
   #     ti and SL should be of exactly the same length.
-  #     NAs are not allowed.
+  #     NAs are allowed. ##MA-TG
   # tp: POSIXct vector that identifies the real date and time of the SL.
   #     The missing steps should be represented with NAs.
   #     For example if you have locations
@@ -142,7 +161,7 @@ mnll3M <- function(SL, ti, tp, int, kcons){
   #     (Although excluded for clarity, tp should include the date)
   #     We recommend that the time series only included the time period
   #     relevant to the birth and death of the calf.
-  #     We only included movement from April 15th to June 30th.
+  #     We only included movement from April 15th to June 30th in Demars et al. (2013), and May 15th to July 15th in Gharajehdaghipour et al. (2025). ##MA-TG. 
   
   # int: integer value indicating the minimum number of steps needed between
   #     the beginning of the time series and the first BP (birth of calf),
@@ -174,7 +193,7 @@ mnll3M <- function(SL, ti, tp, int, kcons){
   colnames(mpar) <- c("b0", "b1", "b2", "k1", "k2")
   
   # Sample size
-  resCA[1] <- length(SL)
+  resCA[1] <- length(na.omit(SL)) ##MA-TG
   
   ##
   # M0: No calf
@@ -183,8 +202,8 @@ mnll3M <- function(SL, ti, tp, int, kcons){
   # The only parameter estimated is b0, which is the inverse of the rate.
   # It has a analytical solution and 
   # thus we can easily get the minimum negative log likelihood (mnll)
-  mpar[1] <- mean(SL)  #b0
-  resCA[2] <- -sum(dexp(SL, 1/mpar[1], log=TRUE)) #mnll0
+  mpar[1] <- mean(SL, na.rm = TRUE)  #b0 ##MA-TG
+  resCA[2] <- -sum(dexp(SL, 1/mpar[1], log=TRUE), na.rm = TRUE) #mnll0 ##MA-TG
   
   ##
   # Calf survived
@@ -194,7 +213,7 @@ mnll3M <- function(SL, ti, tp, int, kcons){
   resCA[3] <- NLL1[[MNLL1i]] # mnll1
   BPs[4] <- BP1ser[MNLL1i] # mle of BP1c in terms of index of SL
   BPs[1] <- as.character(tp[ti[BPs[[4]]]]) #mle of BP1c in real date and time
-  mpar[2] <- mean(SL[1:BPs[[4]]]) #b1
+  mpar[2] <- mean(SL[1:BPs[[4]]], na.rm = TRUE) #b1 ##MA-TG
   mpar[4] <- optimize(nllk, kcons, SLb=SL[(BPs[[4]]+1):resCA[1]], 
                       tib=ti[(BPs[[4]]+1):resCA[1]],
                       ba=mpar[2], tiBP1=ti[BPs[[4]]])$minimum #k1
@@ -217,7 +236,7 @@ mnll3M <- function(SL, ti, tp, int, kcons){
   BPs[5:6] <- BP2ser[[MNLL2i]] #mle of iBP2c and iBP2l in terms of index of SL
   BPs[2] <- as.character(tp[ti[BPs[[5]]]]) #mle BP2c in real date and time
   BPs[3] <- as.character(tp[ti[BPs[[6]]]]) #mle BP2l in real date and time
-  mpar[3] <- mean(SL[1:BPs[[5]]]) #b2
+  mpar[3] <- mean(SL[1:BPs[[5]]], na.rm = TRUE) #b2 ##MA-TG
   mpar[5] <- optimize(nllk, kcons,
                       SLb=SL[(BPs[[5]]+1):BPs[[6]]], 
                       tib=ti[(BPs[[5]]+1):BPs[[6]]],
